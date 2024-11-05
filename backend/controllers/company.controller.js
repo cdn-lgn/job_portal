@@ -61,8 +61,8 @@ export const registerCompany = async (req, res) => {
 
 export const getCompany = async (req, res) => {
 	try {
-		const userId = req.id;
-		const companies = await Company.find({ userId });
+		const addBy = req.id;
+		const companies = await Company.find({ addBy });
 		if (!companies) {
 			return res.status(400).json({
 				message: "No company registered by user",

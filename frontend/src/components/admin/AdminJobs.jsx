@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	Dialog,
 	DialogTrigger,
@@ -9,16 +9,50 @@ import {
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 const COMPANY_URI = import.meta.env.VITE_COMPANY_URI;
+const JOB_URI = import.meta.env.VITE_JOB_URI;
 
 const AdminJobs = () => {
+	const [companies, setCompanies] = useState([]);
+	// Dummy data for job cards
+	const [jobs] = useState([
+		{
+			jobTitle: "Frontend Developer",
+			country: "USA",
+			company: "Tech Solutions",
+			salary: "12 LPA",
+			jobType: "Full-time",
+			category: "Frontend",
+		},
+	]);
+
 	const newJobHandler = async (e) => {
 		e.preventDefault();
 		const formData = new FormData(e.target);
 		const dataObject = Object.fromEntries(formData.entries());
+
+		// Convert requirements and location to arrays
+		if (dataObject.requirements) {
+			dataObject.requirements = dataObject.requirements
+				.split(",")
+				.map((req) => req.trim());
+		}
+		if (dataObject.location) {
+			dataObject.location = dataObject.location
+				.split(",")
+				.map((loc) => loc.trim());
+		}
+
+		console.log(dataObject);
 		try {
-			console.log("new job crated");
+			const response = await axios.post(`${JOB_URI}/post`, dataObject, {
+				headers: {
+					"Content-Type": "multipart/form-data", // JSON data bhejne ke liye
+				},
+				withCredentials: true, // Agar aapko cookies ya credentials bhejna hai
+			});
+			console.log(response.data);
 		} catch (error) {
-			console.log(error.message);
+			console.log(error);
 		}
 	};
 
@@ -43,41 +77,24 @@ const AdminJobs = () => {
 		}
 	};
 
-	// Dummy data for job cards
-	const [jobs] = useState([
-		{
-			jobTitle: "Frontend Developer",
-			country: "USA",
-			company: "Tech Solutions",
-			salary: "12 LPA",
-			jobType: "Full-time",
-			category: "Frontend",
-		},
-		{
-			jobTitle: "Backend Developer",
-			country: "Germany",
-			company: "Backend Masters",
-			salary: "15 LPA",
-			jobType: "Part-time",
-			category: "Backend",
-		},
-		{
-			jobTitle: "UX/UI Designer",
-			country: "UK",
-			company: "Design Pros",
-			salary: "10 LPA",
-			jobType: "Contract",
-			category: "Design",
-		},
-		{
-			jobTitle: "Full Stack Engineer",
-			country: "India",
-			company: "Startup Hub",
-			salary: "18 LPA",
-			jobType: "Full-time",
-			category: "Full Stack",
-		},
-	]);
+	const fetchCompanyList = async () => {
+		try {
+			const response = await axios.get(`${COMPANY_URI}/get`, {
+				headers: {
+					"Content-Type": "multipart/form-data",
+				},
+				withCredentials: true,
+			});
+			setCompanies(response.data.companies); // Store companies in state
+			console.log(response.data.companies);
+		} catch (error) {
+			console.error("Error fetching company list:", error);
+		}
+	};
+
+	const handleCreateJobDialogOpen = () => {
+		fetchCompanyList(); // Fetch companies when the dialog opens
+	};
 
 	return (
 		<div className="container mx-auto p-4">
@@ -143,7 +160,12 @@ const AdminJobs = () => {
 					{/* Button for creating a job */}
 					<Dialog>
 						<DialogTrigger asChild>
-							<Button variant="secondary">Create Job</Button>
+							<Button
+								variant="secondary"
+								onClick={handleCreateJobDialogOpen}
+							>
+								Create Job
+							</Button>
 						</DialogTrigger>
 						<DialogContent>
 							<DialogHeader>
@@ -155,34 +177,57 @@ const AdminJobs = () => {
 									<input
 										className="border p-2 rounded"
 										placeholder="Job Title"
+										name="title"
+										required
+									/>
+									<input
+										className="border p-2 rounded"
+										placeholder="Job Description"
+										name="description"
 										required
 									/>
 									<select
 										className="border p-2 rounded"
-										placeholder="Select Company"
+										name="companyId" // Ensure this is included in the FormData
+										required
 									>
-										<option value="Tech Solutions">
-											Tech Solutions
-										</option>
-										<option value="Backend Masters">
-											Backend Masters
-										</option>
-										<option value="Design Pros">
-											Design Pros
-										</option>
-										<option value="Startup Hub">
-											Startup Hub
-										</option>
+										<option value="">Select</option>
+										{companies?.map((company) => (
+											<option
+												key={company._id}
+												value={company._id}
+											>
+												{company.name}
+											</option>
+										))}
 									</select>
 									<input
 										className="border p-2 rounded"
-										placeholder="Salary"
+										placeholder="Job requirements (comma separated)"
+										name="requirements"
+										required
 									/>
 									<input
 										className="border p-2 rounded"
-										placeholder="Country"
+										placeholder="Salary"
+										name="salary"
 									/>
-									<select className="border p-2 rounded">
+									<input
+										className="border p-2 rounded"
+										placeholder="Job Location (comma separated)"
+										name="location"
+									/>
+									<input
+										className="border p-2 rounded"
+										placeholder="Openings"
+										name="noOfOpening"
+										type="number"
+									/>
+									<select
+										className="border p-2 rounded"
+										name="jobType"
+										required
+									>
 										<option value="Full-time">
 											Full-time
 										</option>

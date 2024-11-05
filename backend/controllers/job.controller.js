@@ -15,6 +15,8 @@ export const postJob = async (req, res) => {
 			salary,
 		} = req.body;
 
+		console.log(req.body);
+
 		if (
 			!title ||
 			!description ||
