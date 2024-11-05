@@ -1,5 +1,6 @@
 // NavBar.jsx
 import React from "react";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import {
 	Popover,
@@ -13,7 +14,9 @@ import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { resetUser } from "@/redux/authSlice";
 import { store } from "../../redux/store";
+import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
+const USER_URI = import.meta.env.VITE_USER_URI;
 
 const NavBar = () => {
 	const user = useSelector((state) => state.user.user);
@@ -24,9 +27,23 @@ const NavBar = () => {
 		navigate("/profile");
 	};
 
-	const logOutHandler = () => {
-		dispatch(resetUser());
-		navigate("/login");
+	const logOutHandler = async () => {
+		try {
+			const response = await axios.post(`${USER_URI}/logout`, {
+				withCredentials: true,
+			});
+
+			// Remove the cookie from the frontend
+			Cookies.remove("token"); // Replace with your actual cookie name
+
+			// Reset the user state in Redux
+			dispatch(resetUser());
+
+			// Navigate to the login page
+			navigate("/login");
+		} catch (error) {
+			console.log(error.message); // Corrected typo from error.messaage to error.message
+		}
 	};
 
 	return (

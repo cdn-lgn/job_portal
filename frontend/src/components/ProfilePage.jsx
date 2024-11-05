@@ -137,22 +137,25 @@ const ProfilePage = () => {
                     type="text"
                   />
                 </div>
-
-                <div className="mb-4">
-                  <Input
-                    name="skills"
-                    placeholder="Skills (comma separated)"
-                    defaultValue={user.profile.skills?.join(",")}
-                  />
-                </div>
-                <div className="mb-4">
-                  <input
-                    name="file"
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    className="block w-full text-sm text-gray-600"
-                  />
-                </div>
+                {user.role === "Student" && (
+                  <>
+                    <div className="mb-4">
+                      <Input
+                        name="skills"
+                        placeholder="Skills (comma separated)"
+                        defaultValue={user.profile.skills?.join(",")}
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <input
+                        name="file"
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        className="block w-full text-sm text-gray-600"
+                      />
+                    </div>
+                  </>
+                )}
 
                 <DialogClose asChild>
                   <Button variant="default" type="submit" className="w-full">
@@ -174,36 +177,40 @@ const ProfilePage = () => {
           <span className="font-semibold">Phone Number:</span>{" "}
           {user.phoneNumber}
         </div>
-        <div>
-          <span className="font-semibold">Role:</span> {user.role}
-        </div>
 
         {/* Show skills and resume*/}
-
-        <div>
-          <span className="font-semibold">Skills:</span>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {user.profile.skills?.map((skill, index) => (
-              <span
-                key={index}
-                className="bg-black text-white rounded-full px-2 py-1 text-sm"
+        {user.role === "Student" ? (
+          <>
+            <div>
+              <span className="font-semibold">Skills:</span>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {user.profile.skills?.map((skill, index) => (
+                  <span
+                    key={index}
+                    className="bg-black text-white rounded-full px-2 py-1 text-sm"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <span className="font-semibold">Resume:</span>
+              <a
+                href={user.profile?.resume?.resumeLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 pl-2"
               >
-                {skill}
-              </span>
-            ))}
+                {user.profile?.resume?.resumeName}
+              </a>
+            </div>
+          </>
+        ) : (
+          <div>
+            <span className="font-semibold">role:</span> {user.role}
           </div>
-        </div>
-        <div>
-          <span className="font-semibold">Resume:</span>
-          <a
-            href={user.profile?.resume?.resumeLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 pl-2"
-          >
-            {user.profile?.resume?.resumeName}
-          </a>
-        </div>
+        )}
       </div>
 
       {/* Show Jobs Table Only if Role is Student */}

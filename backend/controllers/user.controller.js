@@ -17,8 +17,6 @@ export const register = async (req, res) => {
 			});
 		}
 
-		console.log(fullName, email, phoneNumber, password, role);
-
 		// Check if user already exists
 		let user = await User.findOne({ email });
 		if (user) {
@@ -31,7 +29,6 @@ export const register = async (req, res) => {
 		let fileUploadResult;
 		// Handle file upload if present
 		if (req.file) {
-			console.log("File path:", req.file.originalname); // Log the file name
 			fileUploadResult = await uploadResponse(
 				req.file.buffer,
 				req.file.originalname,

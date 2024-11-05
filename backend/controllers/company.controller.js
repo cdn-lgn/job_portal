@@ -1,10 +1,20 @@
 import { Company } from "../models/company.model.js";
 import { User } from "../models/user.model.js";
+import { uploadResponse } from "../utils/imagekitConfig.js";
 
 export const registerCompany = async (req, res) => {
 	try {
 		const { name, description, location, website } = req.body;
-		// const logoFIle = req.file;
+		let fileUploadResult;
+
+		// Handle file upload if present
+		if (req.file) {
+			console.log("File path:", req.file.originalname); // Log the file name
+			fileUploadResult = await uploadResponse(
+				req.file.buffer,
+				req.file.originalname,
+			);
+		}
 
 		if (!name) {
 			return res.status(400).json({
@@ -12,6 +22,7 @@ export const registerCompany = async (req, res) => {
 				success: false,
 			});
 		}
+
 		const checkName = await Company.findOne({ name });
 		if (checkName) {
 			return res.status(400).json({
@@ -20,23 +31,31 @@ export const registerCompany = async (req, res) => {
 			});
 		}
 
-		await Company.create({
+		const companyData = {
 			name,
 			description,
 			location,
 			website,
-			// logo,
-			userId: req.id,
-		});
+			addBy: req.id,
+		};
 
-		const company = await Company.findOne({ name });
+		if (fileUploadResult) {
+			companyData.logo = fileUploadResult.fileUrl; // Only add logo if file upload was successful
+		}
 
-		return res.status(200).json({
+		await Company.create(companyData);
+
+		return res.status(201).json({
 			message: "Company registered successfully",
 			success: true,
 		});
 	} catch (error) {
 		console.log(error.message);
+		return res.status(500).json({
+			message: "An error occurred while registering the company.",
+			success: false,
+			error: error.message,
+		});
 	}
 };
 

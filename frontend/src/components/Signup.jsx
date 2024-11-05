@@ -37,7 +37,7 @@ const Signup = () => {
     try {
       const response = await registerUser(dataObject); // Register user and get response
       console.log("User registered successfully:", response); // Success message
-      navigate("/");
+      navigate("/login");
     } catch (error) {
       console.error("Registration failed:", error); // Error handling
     }
