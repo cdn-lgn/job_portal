@@ -43,11 +43,12 @@ export const registerCompany = async (req, res) => {
 			companyData.logo = fileUploadResult.fileUrl; // Only add logo if file upload was successful
 		}
 
-		await Company.create(companyData);
+		const company = await Company.create(companyData);
 
 		return res.status(201).json({
 			message: "Company registered successfully",
 			success: true,
+			company,
 		});
 	} catch (error) {
 		console.log(error.message);

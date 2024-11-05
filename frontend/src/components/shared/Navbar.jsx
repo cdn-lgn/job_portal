@@ -57,6 +57,14 @@ const NavBar = () => {
 				<Link to="/" className="cursor-pointer hover:underline">
 					Home
 				</Link>
+				{user.role === "Recruiter" && (
+					<Link
+						to="/companies"
+						className="cursor-pointer hover:underline"
+					>
+						Companies
+					</Link>
+				)}
 				<Link to="/jobs" className="cursor-pointer hover:underline">
 					Jobs
 				</Link>

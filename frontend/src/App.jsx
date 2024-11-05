@@ -6,6 +6,7 @@ import ProfilePage from "./components/ProfilePage";
 import Signup from "./components/Signup";
 import AllJobs from "./components/Jobs";
 import AdminJobs from "./components/admin/AdminJobs";
+import AdminCompanies from "./components/admin/AdminCompanies";
 import SingleJobPage from "./components/SingleJobPage";
 import Navbar from "./components/shared/Navbar";
 import Footer from "./components/shared/Footer"; // 👈 Import Footer component
@@ -27,14 +28,17 @@ function App() {
       <div className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} /> {/* 👈 Renders at /app/ */}
-          <Route path="/login" element={<Login />} />{" "}
-          <Route path="/signup" element={<Signup />} />{" "}
-          <Route path="/profile" element={<ProfilePage />} />{" "}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          {user.role === "Recruiter" && (
+            <Route path="/companies" element={<AdminCompanies />} />
+          )}
           <Route
             path="/jobs"
             element={user?.role === "Recruiter" ? <AdminJobs /> : <AllJobs />}
-          />{" "}
-          <Route path="/job/:id" element={<SingleJobPage />} />{" "}
+          />
+          <Route path="/job/:id" element={<SingleJobPage />} />
           {/* 👈 Renders at /app/ */}
         </Routes>
       </div>

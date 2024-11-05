@@ -56,27 +56,6 @@ const AdminJobs = () => {
 		}
 	};
 
-	const newCompanyHandler = async (e) => {
-		e.preventDefault();
-		const formData = new FormData(e.target);
-		const dataObject = Object.fromEntries(formData.entries());
-		try {
-			const response = await axios.post(
-				`${COMPANY_URI}/register`,
-				dataObject,
-				{
-					headers: {
-						"Content-Type": "multipart/form-data", // JSON data bhejne ke liye
-					},
-					withCredentials: true, // Agar aapko cookies ya credentials bhejna hai
-				},
-			);
-			console.log(response.data);
-		} catch (error) {
-			console.log(error.message);
-		}
-	};
-
 	const fetchCompanyList = async () => {
 		try {
 			const response = await axios.get(`${COMPANY_URI}/get`, {
@@ -100,63 +79,6 @@ const AdminJobs = () => {
 		<div className="container mx-auto p-4">
 			<div className="flex justify-end items-center mb-4">
 				<div className="flex gap-4">
-					{/* Button for adding a company */}
-					<Dialog>
-						<DialogTrigger asChild>
-							<Button variant="secondary">Add Company</Button>
-						</DialogTrigger>
-						<DialogContent>
-							<DialogHeader>
-								<DialogTitle>Add New Company</DialogTitle>
-							</DialogHeader>
-							<form onSubmit={newCompanyHandler}>
-								{/* Form fields for company details */}
-								<div className="flex flex-col gap-4">
-									<input
-										className="border p-2 rounded"
-										placeholder="Company Name"
-										name="name"
-										required
-									/>
-									<input
-										className="border p-2 rounded"
-										placeholder="Description"
-										name="description"
-									/>
-									<input
-										className="border p-2 rounded"
-										placeholder="Website"
-										name="website"
-									/>
-									<input
-										className="border p-2 rounded"
-										placeholder="Location"
-										name="location"
-									/>
-									<div className="my-4">
-										<label
-											htmlFor="profilePhoto"
-											className="block text-sm font-medium text-gray-700"
-										>
-											Upload Profile Photo
-										</label>
-										<input
-											id="profilePhoto"
-											name="file"
-											type="file"
-											accept="image/*"
-											className="mt-1 block w-full text-sm text-gray-500"
-											required
-										/>
-									</div>
-									<Button type="submit" className="mt-2">
-										Submit
-									</Button>
-								</div>
-							</form>
-						</DialogContent>
-					</Dialog>
-
 					{/* Button for creating a job */}
 					<Dialog>
 						<DialogTrigger asChild>
