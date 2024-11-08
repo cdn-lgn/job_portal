@@ -7,6 +7,7 @@ import Signup from "./components/Signup";
 import AllJobs from "./components/Jobs";
 import AdminJobs from "./components/admin/AdminJobs";
 import AdminCompanies from "./components/admin/AdminCompanies";
+import AdminSingleJobPage from "./components/admin/AdminSingleJobPage";
 import SingleJobPage from "./components/SingleJobPage";
 import Navbar from "./components/shared/Navbar";
 import Footer from "./components/shared/Footer"; // 👈 Import Footer component
@@ -76,6 +77,18 @@ function App() {
               ) : (
                 <ProtectedRoute requiredRole="Recruiter">
                   <AdminJobs />
+                </ProtectedRoute>
+              )
+            }
+          />
+          <Route
+            path="/jobs/:jobId"
+            element={
+              user?.role === "Student" ? (
+                <SingleJobPage />
+              ) : (
+                <ProtectedRoute requiredRole="Recruiter">
+                  <AdminSingleJobPage />
                 </ProtectedRoute>
               )
             }

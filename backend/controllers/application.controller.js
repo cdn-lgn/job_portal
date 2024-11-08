@@ -87,31 +87,49 @@ export const getAppliedJobs = async (req, res) => {
 export const getAllAppliedApplicant = async (req, res) => {
 	try {
 		const jobId = req.params.id;
-		const isJobExist = await Job.findById(jobId);
 
+		// Check if the job exists
+		const isJobExist = await Job.findById(jobId);
 		if (!isJobExist) {
 			return res.status(400).json({
-				message: "job does not exist",
+				message: "Job does not exist",
 				success: false,
 			});
 		}
 
-		const applicants = await Job.findById(jobId).populate({
+		// Fetch the job and populate the applications and applicant details
+		const jobWithApplicants = await Job.findById(jobId).populate({
 			path: "applications",
 			options: { sort: { createdAt: -1 } },
-			populate: { path: "applicant" },
+			populate: { path: "applicant" }, // Populate the applicant field
 		});
 
+		// Check if applications exist
+		if (
+			!jobWithApplicants.applications ||
+			jobWithApplicants.applications.length === 0
+		) {
+			return res.status(200).json({
+				message: "No applicants found for this job",
+				applicants: [],
+				success: true,
+			});
+		}
+
+		// Return the populated applicants
 		return res.status(200).json({
-			message: "apllied jobs",
-			applicants,
+			message: "Applied jobs",
+			applicants: jobWithApplicants.applications, // This should now contain full applicant details
 			success: true,
 		});
 	} catch (error) {
-		console.log(error.message);
+		console.error("Error fetching applicants:", error.message);
+		return res.status(500).json({
+			message: "Internal server error",
+			success: false,
+		});
 	}
 };
-
 export const updateApplicationStatus = async (req, res) => {
 	try {
 		const { status } = req.body;

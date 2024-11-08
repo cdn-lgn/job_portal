@@ -7,18 +7,6 @@ import { useSelector } from "react-redux";
 const JOB_URI = import.meta.env.VITE_JOB_URI;
 const APPLICATION_URI = import.meta.env.VITE_APPLICATION_URI;
 
-// const job = {
-//   jobTitle: "Frontend Developer",
-//   company: "Tech Solutions",
-//   companyLogo: "https://github.com/shadcn.png",
-//   description: "We are looking for a skilled frontend developer...",
-//   jobLocation: "New York, USA",
-//   jobType: "Full-time",
-//   noOfOpenings: 3,
-//   applicantsApplied: 25,
-//   salary: "12 LPA",
-// };
-
 const SingleJobPage = () => {
   const user = useSelector((state) => state.user.user);
   const jobApplications = useSelector(

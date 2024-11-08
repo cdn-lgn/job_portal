@@ -6,6 +6,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 const COMPANY_URI = import.meta.env.VITE_COMPANY_URI;
@@ -14,6 +15,11 @@ const JOB_URI = import.meta.env.VITE_JOB_URI;
 const AdminJobs = () => {
 	const [companies, setCompanies] = useState([]);
 	const [jobs, setJobs] = useState([]);
+	const navigate = useNavigate();
+
+	const jobDetailsPage = (jobId) => {
+		navigate(`/jobs/${jobId}`);
+	};
 
 	const newJobHandler = async (e) => {
 		e.preventDefault();
@@ -46,7 +52,9 @@ const AdminJobs = () => {
 
 	const fetchCompanyList = async () => {
 		try {
-			const response = await axios.get(`${COMPANY_URI}/get`, {withCredentials: true});
+			const response = await axios.get(`${COMPANY_URI}/get`, {
+				withCredentials: true,
+			});
 			setCompanies(response.data.companies); // Store companies in state
 			console.log(response.data.companies);
 		} catch (error) {
@@ -178,7 +186,10 @@ const AdminJobs = () => {
 						key={index}
 						className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
 					>
-						<h3 className="text-xl font-semibold cursor-pointer hover:underline">
+						<h3
+							className="text-xl font-semibold cursor-pointer hover:underline"
+							onClick={() => jobDetailsPage(job._id)}
+						>
 							{job.title}
 						</h3>
 						<p className="text-gray-600">{job.company.name}</p>

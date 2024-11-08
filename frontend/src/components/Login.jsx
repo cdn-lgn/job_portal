@@ -32,7 +32,6 @@ const Login = () => {
       dispatch(setUser(response.data.user));
       toast({
         title: "Logged in successfully",
-        description: "Welcome back!",
       });
       navigate("/");
       console.log(response.data);
