@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,35 +13,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "@/redux/authSlice";
 import { toast } from "@/hooks/use-toast";
 import axios from "axios";
+import { setUserAllApplications } from "../redux/authSlice";
 
+const APPLICATION_URI = import.meta.env.VITE_APPLICATION_URI;
 const USER_URI = import.meta.env.VITE_USER_URI;
-
-const appliedJobs = [
-  {
-    appliedDate: "2024-10-10",
-    companyName: "Tech Solutions Inc.",
-    role: "Frontend Developer",
-    status: "Pending",
-  },
-  {
-    appliedDate: "2024-10-15",
-    companyName: "Creative Minds",
-    role: "UI/UX Designer",
-    status: "Accepted",
-  },
-  {
-    appliedDate: "2024-10-18",
-    companyName: "Future Innovations",
-    role: "Backend Developer",
-    status: "Rejected",
-  },
-  {
-    appliedDate: "2024-10-21",
-    companyName: "Global Ventures",
-    role: "Full Stack Developer",
-    status: "Pending",
-  },
-];
 
 const ProfilePage = () => {
   const jobApplications = useSelector(
@@ -49,6 +24,18 @@ const ProfilePage = () => {
   );
   const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
+
+  const fetchUsersAllApplications = async () => {
+    try {
+      const response = await axios.get(`${APPLICATION_URI}/list`, {
+        withCredentials: true,
+      });
+      dispatch(setUserAllApplications(response.data.appliedJobs));
+      console.log(response);
+    } catch (error) {
+      console.error("Error fetching applications:", error);
+    }
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -76,7 +63,9 @@ const ProfilePage = () => {
       );
     }
   };
-
+  useEffect(() => {
+    fetchUsersAllApplications();
+  }, []);
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-lg shadow-md">
       {/* Profile Info */}
@@ -230,7 +219,7 @@ const ProfilePage = () => {
               </tr>
             </thead>
             <tbody>
-              {jobApplications.map((job, index) => (
+              {jobApplications?.map((job, index) => (
                 <tr
                   key={index}
                   className="border-b hover:bg-gray-100 transition-colors"

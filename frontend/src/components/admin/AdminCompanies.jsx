@@ -5,14 +5,18 @@ import {
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
+	DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 
 const COMPANY_URI = import.meta.env.VITE_COMPANY_URI;
 
 const AdminJobs = () => {
+	const { toast } = useToast();
 	const [companies, setCompanies] = useState([]);
+	const [isDialogOpen, setIsDialogOpen] = useState(false); // State for managing dialog open/close
 
 	const newCompanyHandler = async (e) => {
 		e.preventDefault();
@@ -24,14 +28,22 @@ const AdminJobs = () => {
 				dataObject,
 				{
 					headers: {
-						"Content-Type": "multipart/form-data", // JSON data bhejne ke liye
+						"Content-Type": "multipart/form-data",
 					},
-					withCredentials: true, // Agar aapko cookies ya credentials bhejna hai
+					withCredentials: true,
 				},
 			);
 			setCompanies([...companies, response.data.company]);
+			toast({
+				title: "Job created successfully",
+			});
+			setIsDialogOpen(false); // Close the dialog on successful submission
 		} catch (error) {
-			console.log(error.message);
+			console.log(error);
+			toast({
+				variant: "destructive",
+				description: error?.response?.data?.message,
+			});
 		}
 	};
 
@@ -43,7 +55,7 @@ const AdminJobs = () => {
 				},
 				withCredentials: true,
 			});
-			setCompanies(response.data.companies); // Store companies in state
+			setCompanies(response.data.companies);
 			console.log(response.data.companies);
 		} catch (error) {
 			console.error("Error fetching company list:", error);
@@ -51,21 +63,27 @@ const AdminJobs = () => {
 	};
 
 	useEffect(() => {
-		return () => {
-			fetchCompanyList();
-		};
+		fetchCompanyList(); // Fetch company list on component mount
 	}, []);
 
 	return (
 		<div className="container mx-auto p-4">
 			<div className="flex justify-end items-center mb-4">
-				<Dialog>
+				<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 					<DialogTrigger asChild>
-						<Button variant="secondary">Add Company</Button>
+						<Button
+							variant="secondary"
+							onClick={() => setIsDialogOpen(true)}
+						>
+							Add Company
+						</Button>
 					</DialogTrigger>
 					<DialogContent>
 						<DialogHeader>
 							<DialogTitle>Add New Company</DialogTitle>
+							<DialogClose
+								onClick={() => setIsDialogOpen(false)}
+							/>
 						</DialogHeader>
 						<form onSubmit={newCompanyHandler}>
 							<div className="flex flex-col gap-4">
@@ -114,7 +132,6 @@ const AdminJobs = () => {
 					</DialogContent>
 				</Dialog>
 			</div>
-
 			{/* Company cards display */}
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 				{companies.map((company) => (

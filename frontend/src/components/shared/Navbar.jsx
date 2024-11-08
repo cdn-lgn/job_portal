@@ -12,10 +12,11 @@ import { Label } from "@/components/ui/label";
 import { DoorOpen, User, LogOut, User2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { resetUser } from "@/redux/authSlice";
+import { resetUser, resetUserAllApplications } from "@/redux/authSlice";
 import { store } from "../../redux/store";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
+
 const USER_URI = import.meta.env.VITE_USER_URI;
 
 const NavBar = () => {
@@ -38,6 +39,7 @@ const NavBar = () => {
 
 			// Reset the user state in Redux
 			dispatch(resetUser());
+			dispatch(resetUserAllApplications());
 
 			// Navigate to the login page
 			navigate("/login");

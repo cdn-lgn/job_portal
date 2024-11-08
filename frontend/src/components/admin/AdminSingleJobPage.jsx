@@ -46,11 +46,9 @@ const AdminSingleJobPage = () => {
 
   const updateApplicationStatus = async (applicantId, status) => {
     try {
-      await axios.patch(
-        `${APPLICATION_URI}/update-status/${applicantId}`,
-        {
-          status,
-        },
+      await axios.put(
+        `${APPLICATION_URI}/${applicantId}/update`,
+        { status },
         {
           withCredentials: true,
         },
@@ -157,37 +155,38 @@ const AdminSingleJobPage = () => {
                     </a>
                   </td>
                   <td className="p-3 capitalize">
-                    {applicant.status || "Pending"}
+                    <span className={`status-label ${applicant.status}`}>
+                      {applicant.status || "Pending"}
+                    </span>
                   </td>
                   <td className="p-3">
                     <div className="flex gap-2">
-                      <Button
-                        variant="success"
-                        size="sm"
-                        onClick={() =>
-                          updateApplicationStatus(applicant._id, "accepted")
-                        }
-                      >
-                        Accept
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() =>
-                          updateApplicationStatus(applicant._id, "pending")
-                        }
-                      >
-                        Pending
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() =>
-                          updateApplicationStatus(applicant._id, "rejected")
-                        }
-                      >
-                        Reject
-                      </Button>
+                      {applicant.status === "pending" ? (
+                        <>
+                          <Button
+                            variant="success"
+                            size="sm"
+                            onClick={() =>
+                              updateApplicationStatus(applicant._id, "accepted")
+                            }
+                          >
+                            Accept
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() =>
+                              updateApplicationStatus(applicant._id, "rejected")
+                            }
+                          >
+                            Reject
+                          </Button>
+                        </>
+                      ) : (
+                        <span className="text-gray-500">
+                          Status cannot be changed
+                        </span>
+                      )}
                     </div>
                   </td>
                 </tr>

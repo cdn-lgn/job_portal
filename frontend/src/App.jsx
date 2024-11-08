@@ -18,29 +18,13 @@ import axios from "axios";
 import NotFound from "./components/NotFound"; // Import NotFound component
 import ProtectedRoute from "./components/ProtectedRoute"; // Import ProtectedRoute component
 
-const APPLICATION_URI = import.meta.env.VITE_APPLICATION_URI;
-
 function App() {
   const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
 
-  const fetchUsersAllApplications = async () => {
-    try {
-      const response = await axios.get(`${APPLICATION_URI}/list`, {
-        withCredentials: true,
-      });
-      dispatch(setUserAllApplications(response.data.appliedJobs));
-      console.log(response);
-    } catch (error) {
-      console.error("Error fetching applications:", error);
-    }
-  };
-
   useEffect(() => {
     const token = Cookies.get("token");
-    if (token) {
-      fetchUsersAllApplications();
-    } else {
+    if (!token) {
       dispatch(resetUser());
     }
   }, [dispatch]); // Add dispatch to the dependency array

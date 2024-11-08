@@ -2,13 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setUserAllApplications } from "../redux/authSlice";
 
 const JOB_URI = import.meta.env.VITE_JOB_URI;
 const APPLICATION_URI = import.meta.env.VITE_APPLICATION_URI;
 
 const SingleJobPage = () => {
   const user = useSelector((state) => state.user.user);
+  const dispatch = useDispatch();
   const jobApplications = useSelector(
     (state) => state.user.userAllApplications,
   );
@@ -16,6 +18,18 @@ const SingleJobPage = () => {
   const [jobApplied, setJobApplied] = useState(false);
   const [job, setJob] = useState({});
   const { jobId } = useParams();
+
+  const fetchUsersAllApplications = async () => {
+    try {
+      const response = await axios.get(`${APPLICATION_URI}/list`, {
+        withCredentials: true,
+      });
+      dispatch(setUserAllApplications(response.data.appliedJobs));
+      console.log(response);
+    } catch (error) {
+      console.error("Error fetching applications:", error);
+    }
+  };
 
   const fetchJobDetails = async () => {
     try {
@@ -53,8 +67,9 @@ const SingleJobPage = () => {
   };
 
   useEffect(() => {
-    fetchJobDetails(); // Call fetchJobDetails directly
-  }, []); // Removed return statement, as it was incorrect
+    fetchJobDetails();
+    fetchUsersAllApplications();
+  }, [dispatch]); // Add dispatch to the dependency array
 
   return (
     <div className="mx-auto p-6 bg-white">

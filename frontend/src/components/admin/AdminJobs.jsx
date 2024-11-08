@@ -9,181 +9,178 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
+import { useToast } from "../../hooks/use-toast";
+
 const COMPANY_URI = import.meta.env.VITE_COMPANY_URI;
 const JOB_URI = import.meta.env.VITE_JOB_URI;
 
 const AdminJobs = () => {
+	const { toast } = useToast();
 	const [companies, setCompanies] = useState([]);
 	const [jobs, setJobs] = useState([]);
+	const [showDialog, setShowDialog] = useState(false); // state for dialog visibility
 	const navigate = useNavigate();
 
+	// Navigate to job details page
 	const jobDetailsPage = (jobId) => {
 		navigate(`/jobs/${jobId}`);
 	};
 
+	// Handle job creation
 	const newJobHandler = async (e) => {
 		e.preventDefault();
 		const formData = new FormData(e.target);
 		const dataObject = Object.fromEntries(formData.entries());
 
 		// Convert requirements and location to arrays
-		if (dataObject.requirements) {
-			dataObject.requirements = dataObject.requirements
-				.split(",")
-				.map((req) => req.trim());
-		}
-		if (dataObject.location) {
-			dataObject.location = dataObject.location
-				.split(",")
-				.map((loc) => loc.trim());
-		}
+		dataObject.requirements = dataObject.requirements
+			?.split(",")
+			.map((req) => req.trim());
+		dataObject.location = dataObject.location
+			?.split(",")
+			.map((loc) => loc.trim());
+
 		try {
 			const response = await axios.post(`${JOB_URI}/post`, dataObject, {
-				headers: {
-					"Content-Type": "multipart/form-data", // JSON data bhejne ke liye
-				},
-				withCredentials: true, // Agar aapko cookies ya credentials bhejna hai
+				headers: { "Content-Type": "multipart/form-data" },
+				withCredentials: true,
 			});
-			setJobs([...jobs, response.data.newJob]);
+			setJobs((prevJobs) => [...prevJobs, response.data.newJob]);
+			toast({ title: "Job added successfully" });
+			setShowDialog(false); // close dialog on success
 		} catch (error) {
-			console.log(error);
+			toast({
+				title: "Something went wrong",
+				description: error.message || "Please try again.",
+			});
 		}
 	};
 
+	// Fetch companies list
 	const fetchCompanyList = async () => {
 		try {
 			const response = await axios.get(`${COMPANY_URI}/get`, {
 				withCredentials: true,
 			});
-			setCompanies(response.data.companies); // Store companies in state
-			console.log(response.data.companies);
+			setCompanies(response.data.companies);
 		} catch (error) {
 			console.error("Error fetching company list:", error);
 		}
 	};
 
-	const handleCreateJobDialogOpen = () => {
-		fetchCompanyList(); // Fetch companies when the dialog opens
-	};
-
+	// Fetch jobs list
 	const fetchJobs = async () => {
 		try {
 			const response = await axios.get(`${JOB_URI}/admin-jobs`, {
 				withCredentials: true,
 			});
-			console.log(response.data.postedJobs);
 			setJobs(response.data.postedJobs);
 		} catch (error) {
-			console.log(error.message);
+			console.error("Error fetching jobs:", error);
 		}
 	};
 
+	// Initial data fetch
 	useEffect(() => {
-		return () => {
-			fetchJobs();
-		};
+		fetchJobs();
+		fetchCompanyList();
 	}, []);
 
 	return (
 		<div className="container mx-auto p-4">
 			<div className="flex justify-end items-center mb-4">
-				<div className="flex gap-4">
-					{/* Button for creating a job */}
-					<Dialog>
-						<DialogTrigger asChild>
-							<Button
-								variant="secondary"
-								onClick={handleCreateJobDialogOpen}
-							>
-								Create Job
-							</Button>
-						</DialogTrigger>
-						<DialogContent>
-							<DialogHeader>
-								<DialogTitle>Create New Job</DialogTitle>
-							</DialogHeader>
-							<form onSubmit={newJobHandler}>
-								{/* Form fields for job details */}
-								<div className="flex flex-col gap-4">
-									<input
-										className="border p-2 rounded"
-										placeholder="Job Title"
-										name="title"
-										required
-									/>
-									<input
-										className="border p-2 rounded"
-										placeholder="Job Description"
-										name="description"
-										required
-									/>
-									<select
-										className="border p-2 rounded"
-										name="companyId" // Ensure this is included in the FormData
-										required
-									>
-										<option value="">Select</option>
-										{companies?.map((company) => (
-											<option
-												key={company._id}
-												value={company._id}
-											>
-												{company.name}
-											</option>
-										))}
-									</select>
-									<input
-										className="border p-2 rounded"
-										placeholder="Job requirements (comma separated)"
-										name="requirements"
-										required
-									/>
-									<input
-										className="border p-2 rounded"
-										placeholder="Salary"
-										name="salary"
-									/>
-									<input
-										className="border p-2 rounded"
-										placeholder="Job Location (comma separated)"
-										name="location"
-									/>
-									<input
-										className="border p-2 rounded"
-										placeholder="Openings"
-										name="noOfOpening"
-										type="number"
-									/>
-									<select
-										className="border p-2 rounded"
-										name="jobType"
-										required
-									>
-										<option value="Full-time">
-											Full-time
+				{/* Button for creating a job */}
+				<Dialog open={showDialog} onOpenChange={setShowDialog}>
+					<DialogTrigger asChild>
+						<Button
+							variant="secondary"
+							onClick={() => setShowDialog(true)}
+						>
+							Create Job
+						</Button>
+					</DialogTrigger>
+					<DialogContent>
+						<DialogHeader>
+							<DialogTitle>Create New Job</DialogTitle>
+						</DialogHeader>
+						<form onSubmit={newJobHandler}>
+							<div className="flex flex-col gap-4">
+								<input
+									className="border p-2 rounded"
+									placeholder="Job Title"
+									name="title"
+									required
+								/>
+								<input
+									className="border p-2 rounded"
+									placeholder="Job Description"
+									name="description"
+									required
+								/>
+								<select
+									className="border p-2 rounded"
+									name="companyId"
+									required
+								>
+									<option value="">
+										{companies.length
+											? "Select a Company"
+											: "No Companies Available"}
+									</option>
+									{companies.map((company) => (
+										<option
+											key={company._id}
+											value={company._id}
+										>
+											{company.name}
 										</option>
-										<option value="Part-time">
-											Part-time
-										</option>
-										<option value="Contract">
-											Contract
-										</option>
-									</select>
-									<Button type="submit" className="mt-2">
-										Submit
-									</Button>
-								</div>
-							</form>
-						</DialogContent>
-					</Dialog>
-				</div>
+									))}
+								</select>
+								<input
+									className="border p-2 rounded"
+									placeholder="Job requirements (comma separated)"
+									name="requirements"
+									required
+								/>
+								<input
+									className="border p-2 rounded"
+									placeholder="Salary"
+									name="salary"
+								/>
+								<input
+									className="border p-2 rounded"
+									placeholder="Job Location (comma separated)"
+									name="location"
+								/>
+								<input
+									className="border p-2 rounded"
+									placeholder="Openings"
+									name="noOfOpening"
+									type="number"
+								/>
+								<select
+									className="border p-2 rounded"
+									name="jobType"
+									required
+								>
+									<option value="Full-time">Full-time</option>
+									<option value="Part-time">Part-time</option>
+									<option value="Contract">Contract</option>
+								</select>
+								<Button type="submit" className="mt-2">
+									Submit
+								</Button>
+							</div>
+						</form>
+					</DialogContent>
+				</Dialog>
 			</div>
 
 			{/* Job cards display */}
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-				{jobs.map((job, index) => (
+				{jobs.map((job) => (
 					<div
-						key={index}
+						key={job._id}
 						className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
 					>
 						<h3
@@ -192,13 +189,12 @@ const AdminJobs = () => {
 						>
 							{job.title}
 						</h3>
-						<p className="text-gray-600">{job.company.name}</p>
-						{job?.location.map((location, index) => {
+						<p className="text-gray-600">{job?.company?.name}</p>
+						{job.location?.map((location, index) => (
 							<p className="text-gray-600" key={index}>
-								{job.location}
-							</p>;
-						})}
-						<p className="text-gray-500">{job.location}</p>
+								{location}
+							</p>
+						))}
 						<div className="flex items-center justify-start gap-4">
 							<span className="text-sm rounded-full px-2 py-1 mt-2 bg-purple-100 text-yellow-800">
 								{job.salary}
