@@ -5,7 +5,7 @@ import { Application } from "../models/application.model.js";
 export const applyForJob = async (req, res) => {
 	try {
 		const userId = req.id;
-		const jobId = req.params.id;
+		const jobId = req.params.jobId;
 
 		if (!jobId) {
 			return res.status(400).json({

@@ -14,8 +14,8 @@ const router = express.Router();
 router
 	.route("/post")
 	.post(isAuthenticated, multerUpload.single("file"), postJob);
-router.route("/get").get(isAuthenticated, getAllJobs);
-router.route("/get/:id").get(isAuthenticated, getJobById);
+router.route("/get").get(getAllJobs);
+router.route("/get/:jobId").get(getJobById);
 router.route("/admin-jobs").get(isAuthenticated, postedJobByUser);
 
 export default router;

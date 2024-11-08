@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SearchBar from "./shared/SearchBar";
 import { Input } from "@/components/ui/input"; // Shadcn/UI Input Component
 import { Button } from "@/components/ui/button"; // Shadcn/UI Button Component
@@ -9,57 +9,9 @@ import {
 	SelectItem,
 	SelectValue,
 } from "@/components/ui/select"; // Shadcn/UI Select Component
-
-const allJobs = [
-	{
-		jobTitle: "Frontend Developer",
-		country: "USA",
-		company: "Tech Solutions",
-		salary: "12 LPA",
-		jobType: "Full-time",
-		category: "Frontend",
-	},
-	{
-		jobTitle: "Backend Developer",
-		country: "Canada",
-		company: "DevCorp",
-		salary: "10 LPA",
-		jobType: "Full-time",
-		category: "Backend",
-	},
-	{
-		jobTitle: "UX/UI Designer",
-		country: "UK",
-		company: "DesignHub",
-		salary: "8 LPA",
-		jobType: "Part-time",
-		category: "Design",
-	},
-	{
-		jobTitle: "Data Scientist",
-		country: "Germany",
-		company: "DataWorks",
-		salary: "15 LPA",
-		jobType: "Full-time",
-		category: "Data",
-	},
-	{
-		jobTitle: "Product Manager",
-		country: "Australia",
-		company: "Innovate Inc.",
-		salary: "20 LPA",
-		jobType: "Full-time",
-		category: "Management",
-	},
-	{
-		jobTitle: "DevOps Engineer",
-		country: "India",
-		company: "Cloudify",
-		salary: "14 LPA",
-		jobType: "Part-time",
-		category: "DevOps",
-	},
-];
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+const JOB_URI = import.meta.env.VITE_JOB_URI;
 
 const AllJobs = () => {
 	// State for filters
@@ -67,6 +19,25 @@ const AllJobs = () => {
 	const [jobType, setJobType] = useState("");
 	const [category, setCategory] = useState("");
 	const [salaryRange, setSalaryRange] = useState("");
+	const [jobs, setJobs] = useState([]);
+	const navigate = useNavigate();
+
+	const fetchJobs = async () => {
+		const response = await axios.get(`${JOB_URI}/get`, {
+			withCredentials: true,
+		});
+		setJobs(response.data.jobs);
+	};
+
+	const jobDetailsPage = (jobId) => {
+		navigate(`/jobs/${jobId}`);
+	};
+
+	useEffect(() => {
+		return () => {
+			fetchJobs();
+		};
+	}, []);
 
 	return (
 		<div className="flex flex-col items-center justify-center gap-4 p-8 bg-gray-100">
@@ -175,16 +146,21 @@ const AllJobs = () => {
 				<div className="w-full md:w-2/3">
 					<h2 className="text-3xl font-bold mb-6">Available Jobs</h2>
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-						{allJobs.map((job, index) => (
+						{jobs?.map((job, index) => (
 							<div
 								key={index}
 								className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
 							>
-								<h3 className="text-xl font-semibold cursor-pointer hover:underline">
-									{job.jobTitle}
+								<h3
+									className="text-xl font-semibold cursor-pointer hover:underline"
+									onClick={() => jobDetailsPage(job._id)}
+								>
+									{job.title}
 								</h3>
-								<p className="text-gray-600">{job.company}</p>
-								<p className="text-gray-500">{job.country}</p>
+								<p className="text-gray-600">
+									{job?.company?.name}
+								</p>
+								<p className="text-gray-500">{job.location}</p>
 								<div className="flex items-center justify-start gap-4">
 									<span
 										className={`text-sm rounded-full px-2 py-1 mt-2 bg-purple-100 text-yellow-800"}`}

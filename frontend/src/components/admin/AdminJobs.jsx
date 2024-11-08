@@ -13,17 +13,7 @@ const JOB_URI = import.meta.env.VITE_JOB_URI;
 
 const AdminJobs = () => {
 	const [companies, setCompanies] = useState([]);
-	// Dummy data for job cards
-	const [jobs] = useState([
-		{
-			jobTitle: "Frontend Developer",
-			country: "USA",
-			company: "Tech Solutions",
-			salary: "12 LPA",
-			jobType: "Full-time",
-			category: "Frontend",
-		},
-	]);
+	const [jobs, setJobs] = useState([]);
 
 	const newJobHandler = async (e) => {
 		e.preventDefault();
@@ -41,8 +31,6 @@ const AdminJobs = () => {
 				.split(",")
 				.map((loc) => loc.trim());
 		}
-
-		console.log(dataObject);
 		try {
 			const response = await axios.post(`${JOB_URI}/post`, dataObject, {
 				headers: {
@@ -50,7 +38,7 @@ const AdminJobs = () => {
 				},
 				withCredentials: true, // Agar aapko cookies ya credentials bhejna hai
 			});
-			console.log(response.data);
+			setJobs([...jobs, response.data.newJob]);
 		} catch (error) {
 			console.log(error);
 		}
@@ -58,12 +46,7 @@ const AdminJobs = () => {
 
 	const fetchCompanyList = async () => {
 		try {
-			const response = await axios.get(`${COMPANY_URI}/get`, {
-				headers: {
-					"Content-Type": "multipart/form-data",
-				},
-				withCredentials: true,
-			});
+			const response = await axios.get(`${COMPANY_URI}/get`, {withCredentials: true});
 			setCompanies(response.data.companies); // Store companies in state
 			console.log(response.data.companies);
 		} catch (error) {
@@ -74,6 +57,24 @@ const AdminJobs = () => {
 	const handleCreateJobDialogOpen = () => {
 		fetchCompanyList(); // Fetch companies when the dialog opens
 	};
+
+	const fetchJobs = async () => {
+		try {
+			const response = await axios.get(`${JOB_URI}/admin-jobs`, {
+				withCredentials: true,
+			});
+			console.log(response.data.postedJobs);
+			setJobs(response.data.postedJobs);
+		} catch (error) {
+			console.log(error.message);
+		}
+	};
+
+	useEffect(() => {
+		return () => {
+			fetchJobs();
+		};
+	}, []);
 
 	return (
 		<div className="container mx-auto p-4">
@@ -178,10 +179,15 @@ const AdminJobs = () => {
 						className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
 					>
 						<h3 className="text-xl font-semibold cursor-pointer hover:underline">
-							{job.jobTitle}
+							{job.title}
 						</h3>
-						<p className="text-gray-600">{job.company}</p>
-						<p className="text-gray-500">{job.country}</p>
+						<p className="text-gray-600">{job.company.name}</p>
+						{job?.location.map((location, index) => {
+							<p className="text-gray-600" key={index}>
+								{job.location}
+							</p>;
+						})}
+						<p className="text-gray-500">{job.location}</p>
 						<div className="flex items-center justify-start gap-4">
 							<span className="text-sm rounded-full px-2 py-1 mt-2 bg-purple-100 text-yellow-800">
 								{job.salary}

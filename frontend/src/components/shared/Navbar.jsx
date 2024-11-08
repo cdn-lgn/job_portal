@@ -57,7 +57,7 @@ const NavBar = () => {
 				<Link to="/" className="cursor-pointer hover:underline">
 					Home
 				</Link>
-				{user.role === "Recruiter" && (
+				{user?.role === "Recruiter" && (
 					<Link
 						to="/companies"
 						className="cursor-pointer hover:underline"
@@ -75,7 +75,7 @@ const NavBar = () => {
 							<PopoverTrigger>
 								<Avatar>
 									<AvatarImage
-										src={user.profile.profilePhoto}
+										src={user?.profile?.profilePhoto}
 									/>
 									<AvatarFallback>CN</AvatarFallback>
 								</Avatar>
@@ -84,17 +84,17 @@ const NavBar = () => {
 								<div className="flex items-center gap-3 mb-4">
 									<Avatar className="w-10 h-10">
 										<AvatarImage
-											src={user.profile.profilePhoto}
+											src={user?.profile?.profilePhoto}
 										/>
 										<AvatarFallback>CN</AvatarFallback>
 									</Avatar>
 									<div>
 										<h1 className="text-sm font-semibold text-gray-800">
-											{user.fullName}
+											{user?.fullName}
 										</h1>
 										<h6 className="text-xs text-gray-500">
-											{user.profile?.bio
-												? user.profile?.bio
+											{user?.profile?.bio
+												? user?.profile?.bio
 												: "NA"}
 										</h6>
 									</div>

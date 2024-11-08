@@ -44,8 +44,11 @@ const appliedJobs = [
 ];
 
 const ProfilePage = () => {
-  const dispatch = useDispatch();
+  const jobApplications = useSelector(
+    (state) => state.user.userAllApplications,
+  );
   const user = useSelector((state) => state.user.user);
+  const dispatch = useDispatch();
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -227,14 +230,14 @@ const ProfilePage = () => {
               </tr>
             </thead>
             <tbody>
-              {appliedJobs.map((job, index) => (
+              {jobApplications.map((job, index) => (
                 <tr
                   key={index}
                   className="border-b hover:bg-gray-100 transition-colors"
                 >
-                  <td className="px-4 py-2">{job.appliedDate}</td>
-                  <td className="px-4 py-2">{job.companyName}</td>
-                  <td className="px-4 py-2">{job.role}</td>
+                  <td className="px-4 py-2">{job?.createdAt?.split("T")[0]}</td>
+                  <td className="px-4 py-2">{job?.job?.company?.name}</td>
+                  <td className="px-4 py-2">{job?.job.title}</td>
                   <td
                     className={`px-4 py-2 ${
                       job.status === "Accepted"

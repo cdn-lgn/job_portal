@@ -9,7 +9,7 @@ import {
 
 const router = express.Router();
 
-router.route("/apply/:id").post(isAuthenticated, applyForJob);
+router.route("/apply/:jobId").post(isAuthenticated, applyForJob);
 router.route("/list").get(isAuthenticated, getAppliedJobs);
 router
 	.route("/:id/applicant-list")

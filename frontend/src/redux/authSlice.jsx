@@ -4,6 +4,7 @@ const userAuthSlice = createSlice({
 	name: "user",
 	initialState: {
 		user: null,
+		userAllApplications: null,
 	},
 	reducers: {
 		setUser: (state, action) => {
@@ -12,8 +13,19 @@ const userAuthSlice = createSlice({
 		resetUser: (state, action) => {
 			state.user = null;
 		},
+		setUserAllApplications: (state, action) => {
+			state.userAllApplications = action.payload;
+		},
+		resetUserAllApplications: (state, action) => {
+			state.userAllApplications = null;
+		},
 	},
 });
 
-export const { setUser, resetUser } = userAuthSlice.actions;
+export const {
+	setUser,
+	resetUser,
+	setUserAllApplications,
+	resetUserAllApplications,
+} = userAuthSlice.actions;
 export default userAuthSlice.reducer;
