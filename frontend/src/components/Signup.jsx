@@ -4,30 +4,13 @@ import axios from "axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const USER_URI = import.meta.env.VITE_USER_URI;
 
 const Signup = () => {
   const navigate = useNavigate();
-
-  const registerUser = async (userData) => {
-    try {
-      const response = await axios.post(`${USER_URI}/register`, userData, {
-        headers: {
-          "Content-Type": "multipart/form-data", // JSON data bhejne ke liye
-        },
-        withCredentials: true, // Agar aapko cookies ya credentials bhejna hai
-      });
-
-      return response.data; // Response data return karein
-    } catch (error) {
-      console.error(
-        "Error registering user:",
-        error.response?.data || error.message,
-      );
-      throw error; // Error ko propagate karein
-    }
-  };
+  const { toast } = useToast();
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -35,16 +18,35 @@ const Signup = () => {
     const dataObject = Object.fromEntries(formData.entries());
 
     try {
-      const response = await registerUser(dataObject); // Register user and get response
-      console.log("User registered successfully:", response); // Success message
+      // Register user and get response
+      const response = await axios.post(`${USER_URI}/register`, dataObject, {
+        headers: {
+          "Content-Type": "multipart/form-data", // Use the appropriate content type
+        },
+        withCredentials: true, // If you need to send cookies or credentials
+      });
+
+      console.log("User  registered successfully:", response.data); // Success message
+
+      // Show a toast notification upon successful registration
+      toast({
+        title: "Registration Successful",
+        description: "You can now log in.",
+      });
+
       navigate("/login");
     } catch (error) {
       console.error("Registration failed:", error); // Error handling
+
+      // Show a toast notification upon registration failure
+      toast({
+        title: "Registration Failed",
+        description:
+          error.response?.data?.message ||
+          "Something went wrong. Please try again.",
+      });
     }
-
-    // console.log(dataObject); // Form data console par dikhai de
   };
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <form

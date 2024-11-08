@@ -71,12 +71,15 @@ function App() {
           <Route
             path="/jobs"
             element={
-              <ProtectedRoute requiredRole="Recruiter">
-                <AdminJobs />
-              </ProtectedRoute>
+              user?.role === "Student" ? (
+                <AllJobs />
+              ) : (
+                <ProtectedRoute requiredRole="Recruiter">
+                  <AdminJobs />
+                </ProtectedRoute>
+              )
             }
           />
-          <Route path="/jobs" element={<AllJobs />} />
           <Route path="/jobs/:jobId" element={<SingleJobPage />} />
           <Route path="/not-found" element={<NotFound />} />
           <Route path="*" element={<Navigate to="/not-found" />} />{" "}

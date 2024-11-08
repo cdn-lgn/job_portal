@@ -3,7 +3,7 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/authSlice";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 const USER_URI = import.meta.env.VITE_USER_URI;
 
 const Login = () => {
+  const { toast } = useToast();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -22,19 +23,25 @@ const Login = () => {
     try {
       const response = await axios.post(`${USER_URI}/login`, dataObject, {
         headers: {
-          // Changed 'header' to 'headers'
           "Content-Type": "application/json",
         },
         withCredentials: true,
       });
 
       // Assuming you want to show a toast notification upon a successful response
-      toast({ title: "Logged in successfully" }); // Changed response.message to response.data.message
       dispatch(setUser(response.data.user));
+      toast({
+        title: "Logged in successfully",
+        description: "Welcome back!",
+      });
       navigate("/");
-      console.log(response.data); // Changed response.user to response.data.user
+      console.log(response.data);
     } catch (error) {
       console.log(error.message);
+      toast({
+        title: "Something went wrong",
+        description: error.message || "Please try again.",
+      });
     }
   };
 
