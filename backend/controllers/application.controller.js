@@ -39,7 +39,7 @@ export const applyForJob = async (req, res) => {
 			job: jobId,
 			applicant: userId,
 		});
-		console.log("jobApplication._id", jobApplication._id);
+		// console.log("jobApplication._id", jobApplication._id);
 		isJobExist.applications.push(jobApplication._id);
 		await isJobExist.save();
 

@@ -1,5 +1,5 @@
 // src/pages/Signup.js
-import React from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,10 @@ const USER_URI = import.meta.env.VITE_USER_URI;
 const Signup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSignup = async (e) => {
+    setIsLoading(true);
     e.preventDefault();
     const formData = new FormData(e.target);
     const dataObject = Object.fromEntries(formData.entries());
@@ -45,6 +47,8 @@ const Signup = () => {
           error.response?.data?.message ||
           "Something went wrong. Please try again.",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
   return (
@@ -108,7 +112,11 @@ const Signup = () => {
           />
         </div>
 
-        <Button variant="default" className="w-full mt-4" type="submit">
+        <Button
+          variant="default"
+          className={`w-full mt-4 ${isLoading && "hidden"}`}
+          type="submit"
+        >
           Sign Up
         </Button>
 

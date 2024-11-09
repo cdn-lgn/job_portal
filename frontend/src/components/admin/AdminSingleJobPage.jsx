@@ -21,6 +21,7 @@ const AdminSingleJobPage = () => {
   );
   const [job, setJob] = useState({});
   const [applicants, setApplicants] = useState([]); // State to store job applicants
+  const [isPageLoading, setIsPageLoading] = useState(true); // Loading state
   const { jobId } = useParams();
 
   const fetchJobDetails = async () => {
@@ -38,7 +39,7 @@ const AdminSingleJobPage = () => {
         },
       );
       setApplicants(applicantsResponse.data.applicants);
-      console.log(applicantsResponse.data.applicants);
+      setIsPageLoading(false);
     } catch (error) {
       console.error("Error fetching job details:", error);
     }
@@ -67,6 +68,14 @@ const AdminSingleJobPage = () => {
   useEffect(() => {
     fetchJobDetails();
   }, []);
+
+  if (isPageLoading) {
+    return (
+      <div className="flex items-center justify-center w-full h-screen">
+        Loading....
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto p-6 bg-white">
@@ -97,11 +106,11 @@ const AdminSingleJobPage = () => {
             <span className="font-semibold">Job requirements:</span>
             {" " + job?.requirements?.join(", ")}
           </div>
-          {job?.location?.map((loc, index) => (
-            <div key={index}>
-              <span className="font-semibold">Job Location:</span> {loc}
-            </div>
-          ))}
+          <div>
+            <span className="font-semibold">Job locations:</span>
+            {" " + job?.location?.join(", ")}
+          </div>
+
           <div>
             <span className="font-semibold">Job Type:</span> {job?.jobType}
           </div>

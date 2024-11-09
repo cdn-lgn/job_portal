@@ -1,22 +1,23 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const userAuthSlice = createSlice({
+// User authentication slice
+const authSlice = createSlice({
 	name: "user",
 	initialState: {
-		user: null,
-		userAllApplications: null,
+		user: null, // User information
+		userAllApplications: null, // All user applications
 	},
 	reducers: {
 		setUser: (state, action) => {
 			state.user = action.payload;
 		},
-		resetUser: (state, action) => {
+		resetUser: (state) => {
 			state.user = null;
 		},
 		setUserAllApplications: (state, action) => {
 			state.userAllApplications = action.payload;
 		},
-		resetUserAllApplications: (state, action) => {
+		resetUserAllApplications: (state) => {
 			state.userAllApplications = null;
 		},
 	},
@@ -27,5 +28,6 @@ export const {
 	resetUser,
 	setUserAllApplications,
 	resetUserAllApplications,
-} = userAuthSlice.actions;
-export default userAuthSlice.reducer;
+} = authSlice.actions;
+
+export default authSlice.reducer;

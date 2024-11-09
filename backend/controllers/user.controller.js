@@ -144,7 +144,7 @@ export const updateProfile = async (req, res) => {
 		let fileUploadResult;
 		// Handle file upload if present
 		if (req.file) {
-			console.log("File path:", req.file.originalname); // Log the file name
+			// console.log("File path:", req.file.originalname); // Log the file name
 			fileUploadResult = await uploadResponse(
 				req.file.buffer,
 				req.file.originalname,

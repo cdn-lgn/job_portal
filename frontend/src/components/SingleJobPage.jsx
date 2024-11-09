@@ -16,6 +16,8 @@ const SingleJobPage = () => {
   );
 
   const [jobApplied, setJobApplied] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [isPageLoading, setIsPageLoading] = useState(true); // Loading state
   const [job, setJob] = useState({});
   const { jobId } = useParams();
 
@@ -25,7 +27,6 @@ const SingleJobPage = () => {
         withCredentials: true,
       });
       dispatch(setUserAllApplications(response.data.appliedJobs));
-      console.log(response);
     } catch (error) {
       console.error("Error fetching applications:", error);
     }
@@ -35,7 +36,6 @@ const SingleJobPage = () => {
     try {
       const response = await axios.get(`${JOB_URI}/get/${jobId}`);
       setJob(response.data.job);
-      console.log(response?.data?.job);
 
       // Check if the job has been applied for
       jobApplications?.forEach((jobIdFromApplication) => {
@@ -43,6 +43,7 @@ const SingleJobPage = () => {
           setJobApplied(true);
         }
       });
+      setIsPageLoading(false);
     } catch (error) {
       console.error("Error fetching job details:", error);
       // Optionally, you can set an error state here to display an error message to the user
@@ -50,6 +51,7 @@ const SingleJobPage = () => {
   };
 
   const applyForJob = async () => {
+    setIsLoading(true);
     try {
       const response = await axios.post(
         `${APPLICATION_URI}/apply/${jobId}`,
@@ -63,6 +65,8 @@ const SingleJobPage = () => {
     } catch (error) {
       console.error("Error applying for job:", error);
       // Optionally, you can set an error state here to display an error message to the user
+    } finally {
+      setIsLoading(false); // End loading
     }
   };
 
@@ -70,6 +74,14 @@ const SingleJobPage = () => {
     fetchJobDetails();
     fetchUsersAllApplications();
   }, [dispatch]); // Add dispatch to the dependency array
+
+  if (isPageLoading) {
+    return (
+      <div className="flex items-center justify-center w-full h-screen">
+        Loading....
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto p-6 bg-white">
@@ -96,7 +108,7 @@ const SingleJobPage = () => {
         ) : (
           <Button
             variant="default"
-            className="mt-4 md:mt-0"
+            className={`mt-4 md:mt-0 ${isLoading && "hidden"}`}
             onClick={applyForJob}
           >
             Apply Now
@@ -116,11 +128,10 @@ const SingleJobPage = () => {
             <span className="font-semibold">Job requirements:</span>
             {" " + job?.requirements?.join(", ")}
           </div>
-          {job?.location?.map((loc, index) => (
-            <div key={index}>
-              <span className="font-semibold">Job Location:</span> {loc}
-            </div>
-          ))}
+          <div>
+            <span className="font-semibold">Job Location:</span>
+            {" " + job?.location?.join(", ")}
+          </div>
           <div>
             <span className="font-semibold">Job Type:</span> {job?.jobType}
           </div>

@@ -15,7 +15,7 @@ export const postJob = async (req, res) => {
 			salary,
 		} = req.body;
 
-		console.log(req.body);
+		// console.log(req.body);
 
 		if (
 			!title ||
@@ -58,21 +58,35 @@ export const postJob = async (req, res) => {
 export const getAllJobs = async (req, res) => {
 	try {
 		const keyword = req.query.keyword || "";
-		//not understand
+		const limit = req.query.limit ? parseInt(req.query.limit) : 0; // Default to no limit (fetch all)
+		const sortBy = req.query.sortBy || "createdAt"; // Default to sorting by createdAt
+		const order = req.query.order === "asc" ? 1 : -1; // Default to descending order
+
+		// Construct the query for keyword search (if provided)
 		const query = {
 			$or: [
 				{ title: { $regex: keyword, $options: "i" } },
 				{ description: { $regex: keyword, $options: "i" } },
 			],
 		};
-		const jobs = await Job.find(query)
-			.populate({ path: "company" })
-			.sort({ createdAt: -1 });
 
-		if (!jobs) {
+		// Prepare the query chain for MongoDB
+		let queryChain = Job.find(query)
+			.populate({ path: "company" })
+			.sort({ [sortBy]: order }); // Dynamic sorting based on the `sortBy` and `order` params
+
+		// Apply the limit if it's greater than 0
+		if (limit > 0) {
+			queryChain = queryChain.limit(limit);
+		}
+
+		// Execute the query
+		const jobs = await queryChain;
+
+		if (!jobs || jobs.length === 0) {
 			return res.status(400).json({
-				message: "no jobs found",
-				success: true,
+				message: "No jobs found",
+				success: false,
 			});
 		}
 
@@ -82,7 +96,11 @@ export const getAllJobs = async (req, res) => {
 			success: true,
 		});
 	} catch (error) {
-		console.log(error.message);
+		console.error("Error fetching jobs:", error.message);
+		return res.status(500).json({
+			message: "Server error",
+			success: false,
+		});
 	}
 };
 

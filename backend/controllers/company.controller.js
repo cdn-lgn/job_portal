@@ -9,7 +9,7 @@ export const registerCompany = async (req, res) => {
 
 		// Handle file upload if present
 		if (req.file) {
-			console.log("File path:", req.file.originalname); // Log the file name
+			// console.log("File path:", req.file.originalname); // Log the file name
 			fileUploadResult = await uploadResponse(
 				req.file.buffer,
 				req.file.originalname,
@@ -71,7 +71,7 @@ export const getCompany = async (req, res) => {
 			});
 		}
 
-		console.log("User ID during fetching:", req.id);
+		// console.log("User ID during fetching:", req.id);
 
 		return res.status(200).json({
 			message: "company registered by user",

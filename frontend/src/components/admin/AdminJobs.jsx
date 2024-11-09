@@ -190,11 +190,10 @@ const AdminJobs = () => {
 							{job.title}
 						</h3>
 						<p className="text-gray-600">{job?.company?.name}</p>
-						{job.location?.map((location, index) => (
-							<p className="text-gray-600" key={index}>
-								{location}
-							</p>
-						))}
+						<div>
+							<span className="font-semibold">Job Location:</span>
+							{" " + job?.location?.join(", ")}
+						</div>
 						<div className="flex items-center justify-start gap-4">
 							<span className="text-sm rounded-full px-2 py-1 mt-2 bg-purple-100 text-yellow-800">
 								{job.salary}

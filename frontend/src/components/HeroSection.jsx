@@ -1,69 +1,39 @@
-import React from "react";
-import SearchBar from "./shared/SearchBar";
-import { Button } from "@/components/ui/button"; // 👈 Shadcn/UI Button Component
-import {
-	Carousel,
-	CarouselContent,
-	CarouselItem,
-	CarouselNext,
-	CarouselPrevious,
-} from "@/components/ui/carousel";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
-const jobTitles = [
-	"Frontend Developer",
-	"Backend Developer",
-	"UX/UI Designer",
-	"Data Scientist",
-	"Product Manager",
-	"DevOps Engineer",
-	"Full Stack Developer",
-];
-const latestJobs = [
-	{
-		jobTitle: "Frontend Developer",
-		country: "USA",
-		company: "Tech Solutions",
-		salary: "12 LPA",
-		jobType: "Full-time",
-	},
-	{
-		jobTitle: "Backend Developer",
-		country: "Canada",
-		company: "DevCorp",
-		salary: "10 LPA",
-		jobType: "Full-time",
-	},
-	{
-		jobTitle: "UX/UI Designer",
-		country: "UK",
-		company: "DesignHub",
-		salary: "8 LPA",
-		jobType: "Part-time",
-	},
-	{
-		jobTitle: "Data Scientist",
-		country: "Germany",
-		company: "DataWorks",
-		salary: "15 LPA",
-		jobType: "Full-time",
-	},
-	{
-		jobTitle: "Product Manager",
-		country: "Australia",
-		company: "Innovate Inc.",
-		salary: "20 LPA",
-		jobType: "Full-time",
-	},
-	{
-		jobTitle: "DevOps Engineer",
-		country: "India",
-		company: "Cloudify",
-		salary: "14 LPA",
-		jobType: "Part-time",
-	},
-];
+// API URI for fetching jobs
+const JOB_URI = import.meta.env.VITE_JOB_URI;
 
 const HeroSection = () => {
+	const [latestJobs, setLatestJobs] = useState([]);
+	const navigate = useNavigate();
+
+	const fetchLatestJobs = async () => {
+		try {
+			const response = await axios.get(`${JOB_URI}/get`, {
+				params: {
+					limit: 6, // Limit to the latest 6 jobs
+					sortBy: "createdAt", // Sort by the `createdAt` field
+					order: "desc", // Order in descending to get the latest jobs first
+				},
+				withCredentials: true, // Include credentials if needed (like for authentication)
+			});
+			setLatestJobs(response.data.jobs); // Set the fetched jobs in the state
+		} catch (error) {
+			console.error("Error fetching latest jobs:", error);
+		}
+	};
+
+	const jobDetailsPage = (jobId) => {
+		navigate(`/jobs/${jobId}`);
+	};
+
+	useEffect(() => {
+		fetchLatestJobs();
+	}, []);
+
 	return (
 		<section className="flex flex-col items-center bg-gray-100 py-12 px-4">
 			<div className="text-center mb-8">
@@ -72,28 +42,9 @@ const HeroSection = () => {
 					<span className="text-green-700">Dream Job</span>{" "}
 					<span>Today!</span>
 				</h1>
-
 				<p className="text-lg text-gray-600">
 					Search through thousands of job listings from top companies.
 				</p>
-			</div>
-			{/* Search Tab */}
-			<SearchBar />
-			{/* Carousel Space */}
-			<div className="w-full max-w-4xl flex items-center justify-center">
-				<Carousel className="w-full max-w-lg">
-					<CarouselContent className="max-w-xs">
-						{jobTitles.map((item, index) => (
-							<CarouselItem key={index}>
-								<div className="px-4 py-2 bg-white rounded-full w-fit cursor-pointer">
-									{item}
-								</div>
-							</CarouselItem>
-						))}
-					</CarouselContent>
-					<CarouselPrevious />
-					<CarouselNext />
-				</Carousel>
 			</div>
 
 			{/* Latest Jobs Section */}
@@ -107,25 +58,44 @@ const HeroSection = () => {
 							key={index}
 							className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
 						>
-							<h3 className="text-xl font-semibold cursor-pointer hover:underline">
-								{job.jobTitle}
+							<h3
+								className="text-xl font-semibold cursor-pointer hover:underline"
+								onClick={() => jobDetailsPage(job._id)}
+							>
+								{job.title}
 							</h3>
-							<p className="text-gray-600">{job.company}</p>
-							<p className="text-gray-500">{job.country}</p>
+							<p className="text-gray-600">
+								{job?.company?.name}
+							</p>
+							<p className="text-gray-500">
+								{job?.location?.join(", ")}
+							</p>
 							<div className="flex items-center justify-start gap-4">
-								<span
-									className={`text-sm rounded-full px-2 py-1 mt-2 bg-purple-100 text-yellow-800"}`}
-								>
+								<span className="text-sm rounded-full px-2 py-1 mt-2 bg-purple-100 text-yellow-800">
 									{job.salary}
 								</span>
 								<span
-									className={`text-sm rounded-full px-2 py-1 mt-2 ${job.jobType === "Full-time" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"}`}
+									className={`text-sm rounded-full px-2 py-1 mt-2 ${
+										job.jobType === "Full-time"
+											? "bg-blue-100 text-blue-800"
+											: "bg-yellow-100 text-yellow-800"
+									}`}
 								>
 									{job.jobType}
 								</span>
 							</div>
 						</div>
 					))}
+				</div>
+
+				{/* View All Jobs Button */}
+				<div className="text-center mt-8">
+					<Button
+						onClick={() => navigate("/jobs")}
+						className="bg-green-700 text-white hover:bg-green-800"
+					>
+						View All Jobs
+					</Button>
 				</div>
 			</div>
 		</section>

@@ -151,7 +151,7 @@ const AdminJobs = () => {
 						<p className="text-gray-500">{company.website}</p>
 						<p className="text-gray-500">{company.location}</p>
 						<div className="mt-4 flex space-x-2">
-							<Button onClick={() => handleEdit(company)}>
+							{/*<Button onClick={() => handleEdit(company)}>
 								Edit
 							</Button>
 							<Button
@@ -159,7 +159,7 @@ const AdminJobs = () => {
 								variant="danger"
 							>
 								Delete
-							</Button>
+							</Button>*/}
 						</div>
 					</div>
 				))}

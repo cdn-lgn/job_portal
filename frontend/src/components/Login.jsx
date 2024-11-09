@@ -1,5 +1,5 @@
 // src/pages/Login.js
-import React from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
@@ -14,8 +14,10 @@ const Login = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e) => {
+    setIsLoading(true);
     e.preventDefault();
     const formData = new FormData(e.target);
     const dataObject = Object.fromEntries(formData.entries());
@@ -41,6 +43,8 @@ const Login = () => {
         title: "Something went wrong",
         description: error.message || "Please try again.",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -75,7 +79,11 @@ const Login = () => {
           </div>
         </div>
 
-        <Button variant="default" className="w-full mt-4" type="submit">
+        <Button
+          variant="default"
+          className={`w-full mt-4 ${isLoading && "hidden"}`}
+          type="submit"
+        >
           Login
         </Button>
 

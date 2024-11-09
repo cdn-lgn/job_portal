@@ -7,6 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogClose,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useDispatch, useSelector } from "react-redux";
@@ -31,7 +32,6 @@ const ProfilePage = () => {
         withCredentials: true,
       });
       dispatch(setUserAllApplications(response.data.appliedJobs));
-      console.log(response);
     } catch (error) {
       console.error("Error fetching applications:", error);
     }
@@ -55,7 +55,6 @@ const ProfilePage = () => {
 
       dispatch(setUser(response.data.user));
       toast({ title: "Profile updated" });
-      console.log(response.data.user);
     } catch (error) {
       console.error(
         "Error updating profile:",
@@ -83,12 +82,15 @@ const ProfilePage = () => {
         </div>
 
         <Dialog>
-          <DialogTrigger>
+          <DialogTrigger asChild>
             <Button variant="default">Edit</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Are you absolutely sure?</DialogTitle>
+              <DialogDescription></DialogDescription>
+              <DialogTitle className="pb-4">
+                Are you absolutely sure?
+              </DialogTitle>
               <form onSubmit={handleSave}>
                 {/* Rest of the Form Fields */}
                 <div className="mb-4">

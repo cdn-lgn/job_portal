@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import SearchBar from "./shared/SearchBar";
 import { Input } from "@/components/ui/input"; // Shadcn/UI Input Component
 import { Button } from "@/components/ui/button"; // Shadcn/UI Button Component
 import {
@@ -14,19 +13,58 @@ import axios from "axios";
 const JOB_URI = import.meta.env.VITE_JOB_URI;
 
 const AllJobs = () => {
-	// State for filters
-	const [location, setLocation] = useState("");
-	const [jobType, setJobType] = useState("");
-	const [category, setCategory] = useState("");
-	const [salaryRange, setSalaryRange] = useState("");
+	// State for available filters
+	const [availableLocations, setAvailableLocations] = useState([]);
+	const [availableJobTypes, setAvailableJobTypes] = useState([]);
+	const [availableSalaryRanges, setAvailableSalaryRanges] = useState([]);
 	const [jobs, setJobs] = useState([]);
+
+	// State for selected filter values
+	const [selectedLocation, setSelectedLocation] = useState(null);
+	const [selectedJobType, setSelectedJobType] = useState(null);
+	const [selectedSalaryRange, setSelectedSalaryRange] = useState(null);
+
 	const navigate = useNavigate();
 
 	const fetchJobs = async () => {
-		const response = await axios.get(`${JOB_URI}/get`, {
-			withCredentials: true,
-		});
-		setJobs(response.data.jobs);
+		try {
+			const response = await axios.get(`${JOB_URI}/get`, {
+				withCredentials: true,
+			});
+			const fetchedJobs = response.data.jobs;
+			setJobs(fetchedJobs);
+
+			// Collect unique values for each filter
+			const uniqueLocations = new Set();
+			const uniqueJobTypes = new Set();
+			const uniqueSalaryRanges = new Set();
+
+			fetchedJobs.forEach((job) => {
+				// Normalize and add location to the Set
+				if (Array.isArray(job.location)) {
+					const locationString = job.location.join(", ");
+					uniqueLocations.add(locationString);
+				} else if (job.location) {
+					uniqueLocations.add(job.location);
+				}
+				// Add other job properties to their respective Sets
+				uniqueJobTypes.add(job.jobType);
+				uniqueSalaryRanges.add(job.salary);
+			});
+
+			// Convert unique locations Set back to an array and split it by ", " to flatten it
+			const flattenedLocations = Array.from(uniqueLocations)
+				.join(", ")
+				.split(", ")
+				.filter((item, index, self) => self.indexOf(item) === index);
+
+			// Update state with unique values
+			setAvailableLocations(flattenedLocations);
+			setAvailableJobTypes([...uniqueJobTypes]);
+			setAvailableSalaryRanges([...uniqueSalaryRanges]);
+		} catch (error) {
+			console.error("Error fetching jobs:", error);
+		}
 	};
 
 	const jobDetailsPage = (jobId) => {
@@ -34,95 +72,82 @@ const AllJobs = () => {
 	};
 
 	useEffect(() => {
-		return () => {
-			fetchJobs();
-		};
+		fetchJobs();
 	}, []);
+
+	// Filter jobs based on selected filters only (no search)
+	const filteredJobs = jobs.filter((job) => {
+		const matchesLocation =
+			!selectedLocation ||
+			job.location.toLowerCase().includes(selectedLocation.toLowerCase());
+		const matchesJobType =
+			!selectedJobType ||
+			job.jobType.toLowerCase() === selectedJobType.toLowerCase();
+		const matchesSalaryRange =
+			!selectedSalaryRange ||
+			job.salary.toLowerCase() === selectedSalaryRange.toLowerCase();
+
+		return matchesLocation && matchesJobType && matchesSalaryRange;
+	});
 
 	return (
 		<div className="flex flex-col items-center justify-center gap-4 p-8 bg-gray-100">
-			<div className="w-full flex items-center justify-center">
-				<SearchBar />
-			</div>
-
-			<div className="w-full flex flex-col md:flex-row items-center justify-between gap-10">
+			{/* Filters */}
+			<div className="w-full flex flex-col md:flex-row items-start justify-between gap-10">
 				{/* Filter Sidebar */}
 				<div className="w-full md:w-1/4 bg-white p-6 rounded-lg shadow-md">
 					<h2 className="text-2xl font-bold mb-6">Filter Jobs</h2>
 
 					{/* Location Filter */}
 					<div className="mb-4">
-						<Input
-							placeholder="Location"
-							value={location}
-							onChange={(e) => setLocation(e.target.value)}
-						/>
-					</div>
-
-					{/* Job Type Filter */}
-					<div className="mb-4">
-						<Select onValueChange={setJobType}>
+						<Select
+							onValueChange={(val) => setSelectedLocation(val)}
+						>
 							<SelectTrigger>
-								<SelectValue placeholder="Select Job Type" />
+								<SelectValue placeholder="Select Location" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="all">
-									All Job Types
-								</SelectItem>
-								<SelectItem value="Full-time">
-									Full-time
-								</SelectItem>
-								<SelectItem value="Part-time">
-									Part-time
-								</SelectItem>
+								{availableLocations?.map((loc, idx) => (
+									<SelectItem key={idx} value={loc}>
+										{loc}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 					</div>
 
-					{/* Category Filter */}
+					{/* Job Type Filter */}
 					<div className="mb-4">
-						<Select onValueChange={setCategory}>
+						<Select
+							onValueChange={(val) => setSelectedJobType(val)}
+						>
 							<SelectTrigger>
-								<SelectValue placeholder="Select Category" />
+								<SelectValue placeholder="Select Job Type" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="all">
-									All Categories
-								</SelectItem>
-								<SelectItem value="Frontend">
-									Frontend
-								</SelectItem>
-								<SelectItem value="Backend">Backend</SelectItem>
-								<SelectItem value="Design">Design</SelectItem>
-								<SelectItem value="Data">Data</SelectItem>
-								<SelectItem value="Management">
-									Management
-								</SelectItem>
-								<SelectItem value="DevOps">DevOps</SelectItem>
+								{availableJobTypes?.map((type, idx) => (
+									<SelectItem key={idx} value={type}>
+										{type}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 					</div>
 
 					{/* Salary Range Filter */}
 					<div className="mb-4">
-						<Select onValueChange={setSalaryRange}>
+						<Select
+							onValueChange={(val) => setSelectedSalaryRange(val)}
+						>
 							<SelectTrigger>
 								<SelectValue placeholder="Select Salary Range" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="all">
-									All Salaries
-								</SelectItem>
-								<SelectItem value="0-10">0 - 10 LPA</SelectItem>
-								<SelectItem value="10-15">
-									10 - 15 LPA
-								</SelectItem>
-								<SelectItem value="15-20">
-									15 - 20 LPA
-								</SelectItem>
-								<SelectItem value="20-30">
-									20 - 30 LPA
-								</SelectItem>
+								{availableSalaryRanges?.map((range, idx) => (
+									<SelectItem key={idx} value={range}>
+										{range}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 					</div>
@@ -132,10 +157,9 @@ const AllJobs = () => {
 						variant="outline"
 						className="w-full mt-4"
 						onClick={() => {
-							setLocation("");
-							setJobType("all");
-							setCategory("all");
-							setSalaryRange("all");
+							setSelectedLocation(null);
+							setSelectedJobType(null);
+							setSelectedSalaryRange(null);
 						}}
 					>
 						Reset Filters
@@ -146,7 +170,7 @@ const AllJobs = () => {
 				<div className="w-full md:w-2/3">
 					<h2 className="text-3xl font-bold mb-6">Available Jobs</h2>
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-						{jobs?.map((job, index) => (
+						{filteredJobs?.map((job, index) => (
 							<div
 								key={index}
 								className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
@@ -155,15 +179,18 @@ const AllJobs = () => {
 									className="text-xl font-semibold cursor-pointer hover:underline"
 									onClick={() => jobDetailsPage(job._id)}
 								>
-									{job.title}
+									{job.title}{" "}
+									{/* Displaying original title case */}
 								</h3>
 								<p className="text-gray-600">
 									{job?.company?.name}
 								</p>
-								<p className="text-gray-500">{job.location}</p>
+								<p className="text-gray-500">
+									{job?.location?.join(", ")}
+								</p>
 								<div className="flex items-center justify-start gap-4">
 									<span
-										className={`text-sm rounded-full px-2 py-1 mt-2 bg-purple-100 text-yellow-800"}`}
+										className={`text-sm rounded-full px-2 py-1 mt-2 bg-purple-100 text-yellow-800`}
 									>
 										{job.salary}
 									</span>
