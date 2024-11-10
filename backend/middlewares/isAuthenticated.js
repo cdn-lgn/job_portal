@@ -4,7 +4,7 @@ export const isAuthenticated = async (req, res, next) => {
 	try {
 		// Extract the token from cookies
 		const token = req.cookies.token;
-		console.log("Token from Cookie:", token); // Check if the token is received
+		console.log("Token from Cookie:", req.cookies); // Check if the token is received
 
 		// If no token found, respond with an authentication error
 		if (!token) {
