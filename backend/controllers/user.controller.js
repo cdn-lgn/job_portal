@@ -1,7 +1,6 @@
 import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { multerUpload } from "../middlewares/multerConfig.js";
 import { uploadResponse } from "../utils/imagekitConfig.js";
 
 // Register Function
@@ -45,7 +44,11 @@ export const register = async (req, res) => {
 			phoneNumber,
 			password: hashedPassword,
 			role,
-			profile: { profilePhoto: fileUploadResult.fileUrl },
+			profile: {
+				profilePhoto: fileUploadResult
+					? fileUploadResult.fileUrl
+					: null,
+			},
 		});
 
 		return res.status(200).json({
@@ -62,12 +65,13 @@ export const register = async (req, res) => {
 	}
 };
 
+// Login Function
 export const login = async (req, res) => {
 	try {
 		const { email, password, role } = req.body;
 		if (!email || !password || !role) {
 			return res.status(400).json({
-				message: "something is missing",
+				message: "Something is missing",
 				success: false,
 			});
 		}
@@ -79,6 +83,7 @@ export const login = async (req, res) => {
 				success: false,
 			});
 		}
+
 		const isPasswordMatch = await bcrypt.compare(password, user.password);
 		if (!isPasswordMatch) {
 			return res.status(400).json({
@@ -93,74 +98,82 @@ export const login = async (req, res) => {
 			});
 		}
 
-		const tokenData = {
-			userId: user._id,
-		};
-		const token = await jwt.sign(tokenData, process.env.SECRET_KEY, {
+		// Generate the JWT token with user ID
+		const tokenData = { userId: user._id };
+		const token = jwt.sign(tokenData, process.env.SECRET_KEY, {
 			expiresIn: "1d",
 		});
 
-		user = {
-			id: user._id,
-			fullName: user.fullName,
-			email: user.email,
-			phoneNumber: user.phoneNumber,
-			role: user.role,
-			profile: user.profile,
-		};
-		return res
-			.status(200)
-			.cookie("token", token, {
-				maxAge: 1 * 24 * 60 * 60 * 100,
-				httpsOnly: true,
-				sameSite: "strict",
-			})
-			.json({
-				message: `welcome back ${user.fullName}`,
-				user,
-				success: true,
-			});
-	} catch (error) {
-		console.log(error);
-	}
-};
+		// Set the token in a cookie with secure settings
+		res.cookie("token", token, {
+			maxAge: 24 * 60 * 60 * 1000, // 1 day
+			httpOnly: true, // Only accessible by the backend
+			secure: true, // Only over HTTPS
+			sameSite: "strict", // Helps prevent CSRF attacks
+		});
 
-export const logOut = async (req, res) => {
-	try {
-		return res
-			.status(200)
-			.cookie("token", "", { maxAge: 0 })
-			.json({ message: "user logout successfullly", success: true });
+		// Send response with the user information
+		res.status(200).json({
+			message: `Welcome back, ${user.fullName}!`,
+			user: {
+				id: user._id,
+				fullName: user.fullName,
+				email: user.email,
+				phoneNumber: user.phoneNumber,
+				role: user.role,
+				profile: user.profile,
+			},
+			success: true,
+		});
 	} catch (error) {
 		console.log(error.message);
+		res.status(500).json({
+			message: "Internal server error",
+			success: false,
+		});
 	}
 };
 
+// Logout Function
+export const logOut = async (req, res) => {
+	try {
+		// Clear the token cookie
+		res.cookie("token", "", { maxAge: 0, httpOnly: true });
+		return res.status(200).json({
+			message: "User logged out successfully",
+			success: true,
+		});
+	} catch (error) {
+		console.log(error.message);
+		res.status(500).json({
+			message: "Logout failed",
+			success: false,
+		});
+	}
+};
+
+// Update Profile Function
 export const updateProfile = async (req, res) => {
 	try {
 		const { fullName, email, phoneNumber, bio, skills } = req.body;
 		const userId = req.id; // Assuming req.id is set by your authentication middleware
 
 		let fileUploadResult;
-		// Handle file upload if present
 		if (req.file) {
-			// console.log("File path:", req.file.originalname); // Log the file name
 			fileUploadResult = await uploadResponse(
 				req.file.buffer,
 				req.file.originalname,
 			);
 		}
 
-		// Find the user by ID
-		let user = await User.findById(userId); // Using findById for better readability
+		let user = await User.findById(userId);
 		if (!user) {
 			return res.status(404).json({
-				message: "User  not found",
+				message: "User not found",
 				success: false,
 			});
 		}
 
-		// Update user fields if provided
 		if (fullName) user.fullName = fullName;
 		if (email) user.email = email;
 		if (phoneNumber) user.phoneNumber = phoneNumber;
@@ -171,23 +184,19 @@ export const updateProfile = async (req, res) => {
 				resumeName: fileUploadResult.fileName,
 			};
 		}
-
-		// Process skills if provided
 		if (skills) {
 			const skillsArray = skills.split(",").map((skill) => skill.trim());
 			user.profile.skills = skillsArray;
 		}
 
-		// Save the updated user document
-		await user.save(); // Persist changes to the database
-
+		await user.save();
 		return res.status(200).json({
-			message: "User  profile updated successfully",
+			message: "User profile updated successfully",
 			user,
 			success: true,
 		});
 	} catch (error) {
-		console.error("Error updating profile:", error.message); // Log the error for debugging
+		console.error("Error updating profile:", error.message);
 		return res.status(500).json({
 			message: "An error occurred while updating the profile.",
 			success: false,
