@@ -11,13 +11,13 @@ const authSlice = createSlice({
 		setUser: (state, action) => {
 			state.user = action.payload;
 		},
-		resetUser: (state) => {
+		resetUser: (action, state) => {
 			state.user = null;
 		},
 		setUserAllApplications: (state, action) => {
 			state.userAllApplications = action.payload;
 		},
-		resetUserAllApplications: (state) => {
+		resetUserAllApplications: (action, state) => {
 			state.userAllApplications = null;
 		},
 	},

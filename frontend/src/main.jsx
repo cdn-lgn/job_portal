@@ -13,7 +13,7 @@ createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <Provider store={store}>
         {/* PersistGate to delay rendering until rehydration is complete */}
-        <PersistGate loading={null} persistor={persistor}>
+        <PersistGate persistor={persistor}>
           <App />
         </PersistGate>
       </Provider>
