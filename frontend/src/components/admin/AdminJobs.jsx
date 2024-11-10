@@ -59,7 +59,7 @@ const AdminJobs = () => {
 	// Fetch companies list
 	const fetchCompanyList = async () => {
 		try {
-			const response = await axios.get(`${COMPANY_URI}/get`, {
+			const response = await axios.get(`${COMPANY_URI}/get`, null, {
 				withCredentials: true,
 			});
 			setCompanies(response.data.companies);
@@ -71,7 +71,7 @@ const AdminJobs = () => {
 	// Fetch jobs list
 	const fetchJobs = async () => {
 		try {
-			const response = await axios.get(`${JOB_URI}/admin-jobs`, {
+			const response = await axios.get(`${JOB_URI}/admin-jobs`, null, {
 				withCredentials: true,
 			});
 			setJobs(response.data.postedJobs);
