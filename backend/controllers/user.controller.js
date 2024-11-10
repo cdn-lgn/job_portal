@@ -109,7 +109,7 @@ export const login = async (req, res) => {
 			maxAge: 24 * 60 * 60 * 1000, // 1 day
 			httpOnly: true, // Only accessible by the backend
 			secure: true, // Only over HTTPS
-			sameSite: "strict", // Helps prevent CSRF attacks
+			sameSite: "lax", // Helps prevent CSRF attacks
 		});
 
 		// Send response with the user information
