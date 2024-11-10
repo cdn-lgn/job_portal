@@ -13,6 +13,7 @@ dotenv.config({});
 const app = express();
 const corsOptions = {
 	origin: process.env.FRONTEND_URL, // Colon ka dhyan rakhein
+	methods: ["GET", "POST", "PUT", "DELETE"],
 	credentials: true, // if you're using cookies/sessions
 };
 
